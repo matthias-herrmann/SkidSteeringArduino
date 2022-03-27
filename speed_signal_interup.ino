@@ -24,16 +24,22 @@ void loop() {
   int motor_pwm_right = val;
 
   float normalized_stearing = normalize_pwm(pwm_value_stearing);
-  Serial.println(normalized_stearing);
   
   if(normalized_stearing < 0.45) { // stearing left
     motor_pwm_right = val;
-    motor_pwm_left = val - (MOTOR_ACTIVE_RANGE * (1 - normalized_stearing) * 5);
+    int left_motor_offset = val - (MOTOR_ACTIVE_RANGE * pow((1 - normalized_stearing), 5));
+    if(left_motor_offset > 0) {
+      motor_pwm_left = left_motor_offset;  
+    }
   } else if (normalized_stearing > 0.55) { // stearing right
-    //motor_pwm_left = val - (MOTOR_ACTIVE_RANGE * (1-normalized_stearing) * (1-normalized_stearing));
-    //motor_pwm_right = val;  
+    motor_pwm_left = val;
+    int right_motor_offset = val - (MOTOR_ACTIVE_RANGE * pow(normalized_stearing, 5));
+    if(right_motor_offset > 0) {
+     motor_pwm_right = right_motor_offset;  
+    }
   }
-  
+
+  Serial.println(motor_pwm_left);
   analogWrite(11, motor_pwm_left); // 11 is left
   analogWrite(10, motor_pwm_right); // 10 is right
 }
